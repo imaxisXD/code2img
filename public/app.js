@@ -21,87 +21,96 @@
 
 /**
  * Add a link tag with provided stylesheet URL in <head>
- * @param {string} stylesheetUrl 
+ * @param {string} stylesheetUrl
  */
 function injectStylesheetForTheme(stylesheetUrl) {
-    let link = document.createElement('link');
-    link.href = stylesheetUrl;
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
+  let link = document.createElement("link");
+  link.href = stylesheetUrl;
+  link.rel = "stylesheet";
+  document.head.appendChild(link);
 }
 
 /**
  * Inject specified theme's css stylesheet into page
- * @param {string} themeName 
+ * @param {string} themeName
  */
 function injectTheme(themeName) {
-    injectStylesheetForTheme(`./prism-themes/prism-${themeName}.css`);
+  injectStylesheetForTheme(`./prism-themes/prism-${themeName}.css`);
 }
 
 const DEFAULTS = {
-    FONT_SIZE: '13px',
-    THEME: 'vsc-dark-plus',
-    SHOW_BACKGROUND: true,
-    BACKGROUND: 'rgb(248, 231, 28)',
-    BACKGROUND_PADDING_REM: "5",
+  FONT_SIZE: "13px",
+  THEME: "vsc-dark-plus",
+  SHOW_BACKGROUND: true,
+  BACKGROUND: "rgb(248, 231, 28)",
+  BACKGROUND_PADDING_REM: "5",
 };
 
 /** @type {Views} */
 const views = {
-    code: document.querySelector('#code'),
-    background: document.querySelector('.background'),
-    codeContainer: document.querySelector('#code-container'),
-    windowHeader: document.querySelector('#header'),
+  code: document.querySelector("#code"),
+  background: document.querySelector(".background"),
+  codeContainer: document.querySelector("#code-container"),
+  windowHeader: document.querySelector("#header"),
 };
 
 const queryParams = new URLSearchParams(window.location.search);
 
 /** @type {RenderOptions} */
 const options = {
-    code: queryParams.get('code'),
-    language: queryParams.get('language'),
-    theme: queryParams.get('theme') || DEFAULTS.THEME,
-    background: {
-        image: queryParams.get('background-image'),
-        color: queryParams.get('background-color') || DEFAULTS.BACKGROUND,
-        padding: queryParams.get('padding') || DEFAULTS.BACKGROUND_PADDING_REM,
-        enabled: queryParams.has('show-background') ? queryParams.get('show-background') === 'true' : DEFAULTS.SHOW_BACKGROUND,
-    },
-    showLineNumbers: queryParams.has('line-numbers') && queryParams.get('line-numbers') === 'true',
+  code: queryParams.get("code"),
+  language: queryParams.get("language"),
+  theme: queryParams.get("theme") || DEFAULTS.THEME,
+  background: {
+    image: queryParams.get("background-image"),
+    color: queryParams.get("background-color")
+      ? decodeURIComponent(queryParams.get("background-color"))
+      : DEFAULTS.BACKGROUND,
+    padding: queryParams.get("padding") || DEFAULTS.BACKGROUND_PADDING_REM,
+    enabled: queryParams.has("show-background")
+      ? queryParams.get("show-background") === "true"
+      : DEFAULTS.SHOW_BACKGROUND,
+  },
+  showLineNumbers:
+    queryParams.has("line-numbers") &&
+    queryParams.get("line-numbers") === "true",
 };
 
-console.info(options);
+console.info(
+  "OPTIONNSSXSSS",
+  options,
+  decodeURIComponent(queryParams.get("background-color"))
+);
 
 if (options.language) {
-    views.codeContainer.classList.add(`language-${options.language}`);
+  views.codeContainer.classList.add(`language-${options.language}`);
 }
 
 if (options.background.enabled) {
-    if (options.background.color) {
-        views.background.style.background = options.background.color;
-    }
-
-    if (options.background.image) {
-        views.background.style.backgroundImage = `url(${options.background.image})`;
-    }
-    
-    if (options.background.padding) {
-        views.background.style.padding = `${options.background.padding}rem`;
-    }
-    
+  if (options.background.image) {
+    views.background.style.backgroundImage = `url(${options.background.image})`;
+  } else if (options.background.color) {
+    views.background.style.background = options.background.color;
+  }
+  views.background.style.padding = `${options.background.padding}rem`;
 } else {
-    views.background.style.padding = "0px";
+  views.background.style.background = "transparent";
+  views.background.style.padding = "0";
 }
 
+// Ensure the code container and window header keep their theme
+views.codeContainer.style.background = "";
+views.windowHeader.style.background = "";
+
 injectTheme(options.theme);
-injectStylesheetForTheme('./base.css');
+injectStylesheetForTheme("./base.css");
 
 if (!options.showLineNumbers) {
-    views.codeContainer.classList.remove('line-numbers');
+  views.codeContainer.classList.remove("line-numbers");
 }
 
 if (options.code) {
-    views.code.textContent = options.code;
+  views.code.textContent = options.code;
 }
 
 window.LOAD_COMPLETE = true;
